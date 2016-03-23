@@ -64,3 +64,13 @@ server:  ## Run the local development server
 release: guard-PART  ## Cut a new release! (e.g. PART=patch make release)
 	$(ENV)/bin/bumpversion $(PART)
 	@echo "Now manually run: git push && git push --tags"
+
+.PHONY: lambda
+lambda: clean-all  ## Prepare the lambda.zip file for AWS Lambda
+	mkdir build
+	pip install -r requirements.txt -t build
+	cp -R auth_backend build/
+	find build -type d -exec chmod ugo+rx {} \;
+	find build -type f -exec chmod ugo+r {} \;
+	find build -name "*.pyc" -exec /bin/rm -rf {} \;
+	cd build; zip -Xr ../lambda.zip *
