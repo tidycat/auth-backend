@@ -1,0 +1,5 @@
+/env
+/.coverage
+/build
+/docs/_build
+/deploy-env
