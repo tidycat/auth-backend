@@ -1,0 +1,21 @@
+language: 'python'
+sudo: false
+python:
+  - "2.7.11"
+
+install:
+  - 'make install'
+
+script:
+  - 'make test'
+
+after_success:
+  - './env/bin/coveralls'
+
+notifications:
+  email: false
+  irc:
+    channels:
+      - secure: "b8ps6CVuinMwhqvFRZ3+nCyzxYQxX9j4qF1kC/yVRCCG/RdO3McmL2zzNKTBYWsa8hOO4GQOdVaqg4WDtuHbzHLJNUPgz8Is4x2PvDQdKZi+SotOYOqkSn/rzJZhVz2jMqvJr/+8ZQ356b7IetYZyFrlIcVuhUM3m3iBJ7RNz+H/MMwrHSghRbkS+9FC0ami89UP+Uhev9xbqxZ1lMvku/3e2aHu1K4bjwLIhnvDUq1Q55zikScYRR62xhIm+FqqNYfEWVI4uySjjD+8uLyfSFZ1/V1WvUR0YjG/AbFBNAFEIWGIiW2+EIrbN/pO/lP2hwI0Q4ZkB8gqNyIWbtb3A9u2RuOYqi6LxvDcO7OHUcY801Gl1dy8GCQxhPUX7979cmxEAt8GdyOl6Fi5ftSvqkiOBV9Pe3EoOlRHgK3cKtOyyws9AFcJ7cI1wcWnGledfuJblJjiqlPhtqy3+ybQF5nmkVteIX9/5V5CumK69odlCacRmJA3KAJoQvQTh9xOfmNKjTRZSzpX2AyhgZu//rQ7dBnDi1IgEwHe5gI7W+eC6VJWoUrw+leTe5KjcKgmV1Mcq8ZPdBz7cFBz4YG8K0g3QU5FBNxzmfcZ/+oLHrx9RUPyQwpCP+1mlA11Qy2LiTf+HyJHcJ5J6vOlBzTDATLUIwM9Ck8y4h7x6cuQ+1s="
+    on_success: "change"
+    on_failure: "change"

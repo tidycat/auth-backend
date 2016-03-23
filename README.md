@@ -1,5 +1,9 @@
 # Authentication Backend
 
+[![Travis CI](https://img.shields.io/travis/tidycat/auth-backend/master.svg?style=flat-square)](https://travis-ci.org/tidycat/auth-backend)
+[![Code Coverage](https://img.shields.io/coveralls/tidycat/auth-backend/master.svg?style=flat-square)](https://coveralls.io/github/tidycat/auth-backend?branch=master)
+[![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.txt)
+
 The role of this backend will be to exchange [temporary GitHub access
 tokens][1] for [JSON Web Tokens][2]. The idea here is that a client-side
 javascript app will handle the initial GitHub authorization portion, after
@@ -16,9 +20,9 @@ A high level overview of how this works:
 1. The client then passes this `access token` along to this authorization
    backend.
 
-1. The authorization backend exchanges this `access token` for a bearer token,
-   stores that bearer token on behalf of the client, and then returns a signed
-   JWT back to the client.
+1. The authorization backend exchanges this `access token` (with GitHub) for a
+   bearer token, stores that bearer token on behalf of the client, and then
+   returns a signed JWT back to the client.
 
 
 ### API Endpoints
