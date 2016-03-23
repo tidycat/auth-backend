@@ -3,6 +3,15 @@ sudo: false
 python:
   - "2.7.11"
 
+env:
+  global:
+    - 'AWS_DEFAULT_REGION=us-east-1'
+    - 'AWS_ACCESS_KEY_ID=AKIAJGARB35NA2OFFNYQ'
+    - secure: "m/K72Fki3Ym5AqxxauCwwdN8elJUf4O9D04WFWR6KXeZC2ylVxLLx7fJpHgob549jJL23MBzXWj5CsI6ylSaBV2SqQ06tE5U4u6rLSW50goRuLLoHXFyNGEhVcC0bnheMNGDJjMjSRDiNiyDj2lwxqkT7yC1XPUq0tT/RBGNFTIyf+1IPyetXk2gtuITpZ9WG92+ATz2jenqRVh3wtpBO+RvvJSJcRSU536rZjojuS1I2cd7LZxNvLc1cbwtgFszB3GyHTx48gN5Zhwpa89M4a43FzPh/ZeEw6v4oISLp2jCKjy7jFVbp+Ug0VS7SmqhuEALBYgeQ+FNnARkYPaFYpLZBPiKGqhNlPX40xXguXZIu8l1cTqdztFmYUk1nNI1FKwppPBtRFN0gRGzUl2Er4300h9VtZ7J22nCzdSoqRQ2lbqddiO1qi7qjgEd25/5c3dg6GlhOyRtehHD5Y5ZYx/E+a4ZRL4DUjHnKSZfdc2K5/TRB5TByOLzuQJMgO5xG/G3KZSquWLZLK3Dxu0E15XuQM1q1dl+0VUJbILjEqAP/pFgN8vgVku8ytD0KlYYdV+kBYUIpVAs3ls/20IVm/2DoKCNd7lYF6IOjvsbu1lqedRoThfkE8pIAEOi/ZqXKqc6ym9c3hWDsUhkCXIa3AQe+B1pM34mOQdwNmPbS+E="
+
+before_install:
+  - 'pip install awscli'
+
 install:
   - 'make install'
 
@@ -11,6 +20,33 @@ script:
 
 after_success:
   - './env/bin/coveralls'
+
+before_deploy:
+  - 'make lambda'
+
+deploy:
+  - provider: 'script'
+    script: '
+      aws lambda
+        update-function-code
+        --function-name "tidycat-auth-backend-staging"
+        --zip-file fileb://lambda.zip
+        --publish'
+    skip_cleanup: true
+    on:
+      repo: 'tidycat/auth-backend'
+      branch: 'master'
+  - provider: 'script'
+    script: '
+      aws lambda
+        update-function-code
+        --function-name "tidycat-auth-backend"
+        --zip-file fileb://lambda.zip
+        --publish'
+    skip_cleanup: true
+    on:
+      repo: 'tidycat/auth-backend'
+      tags: true
 
 notifications:
   email: false
