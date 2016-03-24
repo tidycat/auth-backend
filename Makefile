@@ -36,13 +36,13 @@ install: env  ## Install project dependencies
 	$(ENV)/bin/pip install -r requirements-dev.txt
 
 .PHONY: checkstyle
-checkstyle: install  ## Run the linters locally
+checkstyle:  ## Run the linters locally
 	$(ENV)/bin/flake8 --max-complexity 10 server.py
 	$(ENV)/bin/flake8 --max-complexity 10 auth_backend
 	$(ENV)/bin/flake8 --max-complexity 10 tests
 
 .PHONY: unit-test
-unit-test: install  ## Run the unit-tests locally
+unit-test:  ## Run the unit-tests locally
 	$(ENV)/bin/nosetests \
 		-v \
 		--with-coverage \
