@@ -13,7 +13,16 @@ It has been designed to be fully compatible with the [Ember Simple Auth
 Token][3] addon.
 
 
-### Features
+## Contents
+
+- [Features](#features)
+- [Overview](#overview)
+- [API Endpoints](#api-endpoints)
+- [Deployment](#deployment)
+- [Development](#development)
+
+
+## Features
 
 - Fully compatible with GitHub OAuth2 (no need to maintain users and
   passwords!)
@@ -24,17 +33,7 @@ Token][3] addon.
   etc)
 
 
-### Architecture
-
-- Documentation WIP
-
-
-### Development
-
-- Documentation WIP
-
-
-### Overview
+## Overview
 
 The role of this backend will be to exchange [temporary GitHub access
 tokens][1] for [JSON Web Tokens][2]. The idea here is that a client-side
@@ -57,7 +56,7 @@ A high level overview of how this works:
    returns a signed JWT back to the client.
 
 
-### API Endpoints
+## API Endpoints
 
 - `/auth/token`: Responsible for doing to the token validation and exchange.
 
@@ -65,6 +64,64 @@ A high level overview of how this works:
 for a new one.
 
 - `/auth/ping`: Return the currently running version of the Lambda function.
+
+
+## Deployment
+
+#### Create an IAM role with a policy that looks something like:
+
+``` json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "sns:Publish",
+                "sns:Subscribe"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:*:*",
+                "arn:aws:sns:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:*",
+            "Resource": "arn:aws:dynamodb:<AWS REGION>:<AWS ACCOUNT ID>:table/<DYNAMODB TABLE NAME>"
+        }
+    ]
+}
+```
+
+#### Create the DynamoDB table:
+
+- Table Name: `<DYNAMODB TABLE NAME>`
+- Primary Key: `user_id` (type: `Number`)
+
+(you may leave the other options as default if you wish)
+
+#### Create the Lambda function:
+
+- Name: `tidycat-auth-backend`
+- Runtime: `Python 2.7`
+- Upload zip file: [lambda.zip](https://github.com/tidycat/auth-backend/releases/latest)
+- Handler: `auth_backend/entrypoint.handler`
+- Role: _IAM role you created earlier_
+- Memory: 128 MB
+- Timeout: 30 seconds
+
+#### Setup API Gateway:
+
+- Documentation WIP
+
+
+## Development
+
+- Documentation WIP
 
 
 [1]: https://developer.github.com/v3/oauth/#web-application-flow
