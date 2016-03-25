@@ -12,6 +12,11 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         patcher1 = patch('auth_backend.jwt_authentication.requests')
         self.addCleanup(patcher1.stop)
         self.mock_requests = patcher1.start()
+
+        patcher2 = patch('auth_backend.jwt_authentication.boto3')
+        self.addCleanup(patcher2.stop)
+        self.mock_boto = patcher2.start()
+
         self.jwt_signing_secret = "shh"
 
         token = jwt.encode({"sub": "user1"},
@@ -23,7 +28,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
             "oauth_client_secret": "shh!",
             "payload": {
                 "token": token
-            }
+            },
+            "dynamodb_endpoint_url": "http://example.com",
+            "dynamodb_table_name": "faker"
         }
 
     def test_invalid_jwt(self):
@@ -53,9 +60,23 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
                          "sub field not present in JWT")
         self.assertEqual(len(self.mock_requests.mock_calls), 0)
 
+    def test_bearer_token_not_available(self):
+        auth = JWTAuthentication(self.lambda_event)
+        auth.jwt_signing_secret = self.jwt_signing_secret
+        auth.lookup_bearer_token = MagicMock()
+        auth.lookup_bearer_token.return_value = None
+        result = auth.refresh_jwt()
+        result_json = json.loads(result)
+        self.assertEqual(result_json.get('http_status'), 401)
+        self.assertEqual(result_json.get('data').get('error'),
+                         "Could not find bearer token in datastore")
+        self.assertEqual(len(self.mock_requests.mock_calls), 0)
+
     def test_invalid_user_id(self):
         auth = JWTAuthentication(self.lambda_event)
         auth.jwt_signing_secret = self.jwt_signing_secret
+        auth.lookup_bearer_token = MagicMock()
+        auth.lookup_bearer_token.return_value = "suchtoken"
         auth.retrieve_gh_user_id = MagicMock()
         auth.retrieve_gh_user_id.return_value = None
         result = auth.refresh_jwt()
@@ -68,6 +89,8 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
     def test_refresh_jwt(self):
         auth = JWTAuthentication(self.lambda_event)
         auth.jwt_signing_secret = self.jwt_signing_secret
+        auth.lookup_bearer_token = MagicMock()
+        auth.lookup_bearer_token.return_value = "suchtoken"
         auth.retrieve_gh_user_id = MagicMock()
         auth.retrieve_gh_user_id.return_value = "manytokenseven"
         result = auth.refresh_jwt()

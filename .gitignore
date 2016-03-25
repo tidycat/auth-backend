@@ -3,3 +3,4 @@
 /build
 /docs/_build
 /deploy-env
+dynamodb_sample_data/shared-local-instance.db
