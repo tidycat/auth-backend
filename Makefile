@@ -74,3 +74,7 @@ lambda: clean-all  ## Prepare the lambda.zip file for AWS Lambda
 	find build -type f -exec chmod ugo+r {} \;
 	find build -name "*.pyc" -exec /bin/rm -rf {} \;
 	cd build; zip -Xr ../lambda.zip *
+
+.PHONY: ngrok
+ngrok:
+	ngrok http 127.0.0.1:8080

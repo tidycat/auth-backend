@@ -2,6 +2,7 @@ import BaseHTTPServer
 import sys
 import time
 import json
+import os
 from auth_backend.entrypoint import handler
 
 
@@ -13,28 +14,50 @@ class LocalAuthenticationBackend(BaseHTTPServer.BaseHTTPRequestHandler):
 
     server_version = "LocalAuthBackend/0.1"
 
-    def do_GET(self):
+    def do_OPTIONS(self):
         self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
-        self.wfile.write("Nothing to see here!")
+
+    def do_GET(self):
+        status, result = handle_request({}, self.headers, self.path)
+        self.send_response(status)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(result))
 
     def do_POST(self):
         length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(length)
         payload = json.loads(post_data)
-        result = handle_request(payload, self.headers, self.path)
-        self.send_response(200)
+        status, result = handle_request(payload, self.headers, self.path)
+        self.send_response(status)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        self.wfile.write(result)
+        self.wfile.write(json.dumps(result))
 
 
 def handle_request(payload, headers, resource_path):
     event = {
         "resource-path": resource_path,
-        "payload": payload
+        "payload": payload,
+        "jwt_signing_secret": "supersekr3t",
+        "oauth_client_id": os.environ['OAUTH_CLIENT_ID'],
+        "oauth_client_secret": os.environ['OAUTH_CLIENT_SECRET']
     }
-    return handler(event, {})
+    response_payload = handler(event, {})
+    return transform_response(json.loads(response_payload))
+
+
+def transform_response(response_payload):
+    status = response_payload['http_status']
+    data = response_payload['data']
+    return (status, data)
 
 
 if __name__ == '__main__':
