@@ -2,6 +2,7 @@ import logging
 import requests
 import jwt
 import datetime
+import boto3
 from auth_backend.http import format_response
 
 
@@ -14,7 +15,9 @@ class JWTAuthentication(object):
         for prop in ["payload",
                      "jwt_signing_secret",
                      "oauth_client_id",
-                     "oauth_client_secret"]:
+                     "oauth_client_secret",
+                     "dynamodb_endpoint_url",
+                     "dynamodb_table_name"]:
             setattr(self, prop, lambda_event.get(prop))
         self.expected_oauth_scopes = ['user']
 
@@ -37,6 +40,11 @@ class JWTAuthentication(object):
             error_msg = "Could not find GitHub user id"
             logger.info(error_msg)
             return format_response(401, {"error": error_msg})
+
+        if not self.store_bearer_token(userid, bearer_token):
+            error_msg = "Unable to persist bearer token"
+            logger.error(error_msg)
+            return format_response(500, {"error": error_msg})
 
         return self.format_jwt(userid)
 
@@ -124,7 +132,28 @@ class JWTAuthentication(object):
         encoded = jwt.encode(data, self.jwt_signing_secret, algorithm='HS256')
         return format_response(200, {"token": encoded})
 
-    def lookup_bearer_token(self, user_id):
-        # TODO: Ensure that this function looks up and retrieves the bearer
-        # token from the datastore
-        return "xxx..."
+    def lookup_bearer_token(self, user_id):  # pragma: no cover
+        try:
+            dynamodb = boto3.resource('dynamodb',
+                                      endpoint_url=self.dynamodb_endpoint_url)
+            table = dynamodb.Table(self.dynamodb_table_name)
+            response = table.get_item(Key={"user_id": user_id})
+            return response['Item'].get('bearer_token')
+        except boto3.exceptions.Boto3Error as e:
+            logger.error("Error querying the datastore: %s" % str(e))
+        return None
+
+    def store_bearer_token(self, user_id, bearer_token):  # pragma: no cover
+        try:
+            dynamodb = boto3.resource('dynamodb',
+                                      endpoint_url=self.dynamodb_endpoint_url)
+            table = dynamodb.Table(self.dynamodb_table_name)
+            item = {
+                "user_id": user_id,
+                "bearer_token": bearer_token
+            }
+            table.put_item(Item=item)
+        except boto3.exceptions.Boto3Error as e:
+            logger.error("Error persisting bearer token: %s" % str(e))
+            return False
+        return True

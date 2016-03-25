@@ -12,13 +12,19 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.addCleanup(patcher1.stop)
         self.mock_requests = patcher1.start()
 
+        patcher2 = patch('auth_backend.jwt_authentication.boto3')
+        self.addCleanup(patcher2.stop)
+        self.mock_boto = patcher2.start()
+
         self.lambda_event = {
             "jwt_signing_secret": "sekr3t",
             "oauth_client_id": "c123",
             "oauth_client_secret": "shh!",
             "payload": {
                 "password": "temptoken123"
-            }
+            },
+            "dynamodb_endpoint_url": "http://example.com",
+            "dynamodb_table_name": "faker"
         }
 
     def test_empty_temp_access_code(self):
@@ -59,11 +65,16 @@ class TestJWTAuthNewToken(unittest.TestCase):
                          "Not Authorized")
 
     def test_invalid_user_id(self):
+        self.mock_requests.post = MagicMock()
+        self.mock_requests.post.return_value.status_code = 200
+        self.mock_requests.post.return_value.json.return_value = {
+            "scope": "user",
+            "access_token": "verytoken"
+        }
         payload = {"password": "code123"}
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
-        jwt.retrieve_bearer_token = MagicMock()
-        jwt.retrieve_bearer_token.return_value = "suchtokenWow"
+        jwt.expected_oauth_scopes = ['user']
         self.mock_requests.get = MagicMock()
         self.mock_requests.get.return_value.status_code = 100
         result = jwt.dispense_new_jwt()
@@ -71,6 +82,27 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Could not find GitHub user id")
+
+    def test_unable_to_persist_bearer_token(self):
+        payload = {"password": "code123"}
+        self.lambda_event['payload'] = payload
+        jwt = JWTAuthentication(self.lambda_event)
+        jwt.retrieve_bearer_token = MagicMock()
+        jwt.retrieve_bearer_token.return_value = "suchtokenWow"
+        self.mock_requests.get = MagicMock()
+        self.mock_requests.get.return_value.status_code = 200
+        self.mock_requests.get.return_value.json.return_value = {
+            "user": {
+                "id": "u123"
+            }
+        }
+        jwt.store_bearer_token = MagicMock()
+        jwt.store_bearer_token.return_value = False
+        result = jwt.dispense_new_jwt()
+        result_json = json.loads(result)
+        self.assertEqual(result_json.get('http_status'), 500)
+        self.assertEqual(result_json.get('data').get('error'),
+                         "Unable to persist bearer token")
 
     def test_get_new_jwt(self):
         payload = {"password": "code123"}
@@ -85,6 +117,8 @@ class TestJWTAuthNewToken(unittest.TestCase):
                 "id": "u123"
             }
         }
+        jwt.store_bearer_token = MagicMock()
+        jwt.store_bearer_token.return_value = True
         result = jwt.dispense_new_jwt()
         result_json = json.loads(result)
         self.assertEqual(result_json.get('http_status'), 200)
