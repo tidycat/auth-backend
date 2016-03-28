@@ -46,7 +46,7 @@ class JWTAuthentication(object):
             logger.error(error_msg)
             return format_response(500, {"error": error_msg})
 
-        return self.format_jwt(userid)
+        return self.format_jwt(userid, bearer_token)
 
     def refresh_jwt(self):
         current_jwt = self.payload.get("token")
@@ -76,7 +76,7 @@ class JWTAuthentication(object):
             logger.info(error_msg)
             return format_response(401, {"error": error_msg})
 
-        return self.format_jwt(userid)
+        return self.format_jwt(userid, bearer_token)
 
     def retrieve_bearer_token(self, access_code):
         payload = {
@@ -123,11 +123,12 @@ class JWTAuthentication(object):
         gh_response = r.json()
         return gh_response.get('user').get('id')
 
-    def format_jwt(self, userid):
+    def format_jwt(self, userid, bearer_token):
         data = {
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
-            "sub": userid
+            "sub": userid,
+            "github_token": bearer_token
         }
         encoded = jwt.encode(data, self.jwt_signing_secret, algorithm='HS256')
         return format_response(200, {"token": encoded})
