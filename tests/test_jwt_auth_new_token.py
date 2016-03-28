@@ -31,8 +31,9 @@ class TestJWTAuthNewToken(unittest.TestCase):
         payload = {"password": ""}
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
-        result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            jwt.dispense_new_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 400)
         self.assertEqual(len(self.mock_requests.mock_calls), 0)
 
@@ -42,8 +43,9 @@ class TestJWTAuthNewToken(unittest.TestCase):
         payload = {"password": "code123"}
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
-        result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            jwt.dispense_new_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Not Authorized")
@@ -58,8 +60,9 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
         jwt.expected_oauth_scopes = ['bob']
-        result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            jwt.dispense_new_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Not Authorized")
@@ -77,8 +80,9 @@ class TestJWTAuthNewToken(unittest.TestCase):
         jwt.expected_oauth_scopes = ['user']
         self.mock_requests.get = MagicMock()
         self.mock_requests.get.return_value.status_code = 100
-        result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            jwt.dispense_new_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Could not find GitHub user id")
@@ -98,8 +102,9 @@ class TestJWTAuthNewToken(unittest.TestCase):
         }
         jwt.store_bearer_token = MagicMock()
         jwt.store_bearer_token.return_value = False
-        result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            jwt.dispense_new_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 500)
         self.assertEqual(result_json.get('data').get('error'),
                          "Unable to persist bearer token")
@@ -120,6 +125,5 @@ class TestJWTAuthNewToken(unittest.TestCase):
         jwt.store_bearer_token = MagicMock()
         jwt.store_bearer_token.return_value = True
         result = jwt.dispense_new_jwt()
-        result_json = json.loads(result)
-        self.assertEqual(result_json.get('http_status'), 200)
-        self.assertTrue("token" in result_json.get('data'))
+        self.assertEqual(result.get('http_status'), 200)
+        self.assertTrue("token" in result.get('data'))

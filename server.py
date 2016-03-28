@@ -52,8 +52,11 @@ def handle_request(payload, headers, resource_path):
         "dynamodb_endpoint_url": os.environ['DYNAMODB_ENDPOINT_URL'],
         "dynamodb_table_name": os.environ['DYNAMODB_TABLE_NAME']
     }
-    response_payload = handler(event, {})
-    return transform_response(json.loads(response_payload))
+    try:
+        response_payload = handler(event, {})
+        return transform_response(response_payload)
+    except TypeError as e:
+        return transform_response(json.loads(str(e)))
 
 
 def transform_response(response_payload):
