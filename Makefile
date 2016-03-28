@@ -101,3 +101,16 @@ init-local-dynamodb:  ## Initialize the local instance of DynamoDB
 		--attribute-definitions AttributeName=user_id,AttributeType=N \
 		--key-schema AttributeName=user_id,KeyType=HASH \
 		--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+
+# This will need the following environment variables:
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+# AWS_DEFAULT_REGION
+# LAMBDA_FUNCTION_NAME
+.PHONY: deploy-local-lambda
+deploy-local-lambda: lambda  ## Helper target to upload and deploy a local version of lambda.zip
+	aws lambda \
+		update-function-code \
+		--function-name "${LAMBDA_FUNCTION_NAME}" \
+		--zip-file fileb://lambda.zip \
+		--publish
