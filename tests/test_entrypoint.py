@@ -13,8 +13,9 @@ class TestEntrypoint(unittest.TestCase):
         self.mock_jwt_auth = patcher1.start()
 
     def test_invalid_path(self):
-        result = handler({"resource-path": "/"}, {})
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            handler({"resource-path": "/"}, {})
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 400)
         self.assertEqual(result_json.get('data').get('error'),
                          "Invalid path /")
@@ -22,9 +23,8 @@ class TestEntrypoint(unittest.TestCase):
 
     def test_ping_endpoint(self):
         result = handler({"resource-path": "/auth/ping"}, {})
-        result_json = json.loads(result)
-        self.assertEqual(result_json.get('http_status'), 200)
-        self.assertTrue("version" in result_json.get('data'))
+        self.assertEqual(result.get('http_status'), 200)
+        self.assertTrue("version" in result.get('data'))
         self.assertEqual(len(self.mock_jwt_auth.mock_calls), 0)
 
     def test_token_endpoint(self):

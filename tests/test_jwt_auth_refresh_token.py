@@ -38,8 +38,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         self.lambda_event['payload'] = payload
         auth = JWTAuthentication(self.lambda_event)
         auth.jwt_signing_secret = self.jwt_signing_secret
-        result = auth.refresh_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            auth.refresh_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Invalid JSON Web Token")
@@ -53,8 +54,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         self.lambda_event['payload'] = payload
         auth = JWTAuthentication(self.lambda_event)
         auth.jwt_signing_secret = self.jwt_signing_secret
-        result = auth.refresh_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            auth.refresh_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "sub field not present in JWT")
@@ -65,8 +67,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         auth.jwt_signing_secret = self.jwt_signing_secret
         auth.lookup_bearer_token = MagicMock()
         auth.lookup_bearer_token.return_value = None
-        result = auth.refresh_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            auth.refresh_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Could not find bearer token in datastore")
@@ -79,8 +82,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         auth.lookup_bearer_token.return_value = "suchtoken"
         auth.retrieve_gh_user_id = MagicMock()
         auth.retrieve_gh_user_id.return_value = None
-        result = auth.refresh_jwt()
-        result_json = json.loads(result)
+        with self.assertRaises(TypeError) as cm:
+            auth.refresh_jwt()
+        result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
                          "Could not validate bearer token")
@@ -94,6 +98,5 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         auth.retrieve_gh_user_id = MagicMock()
         auth.retrieve_gh_user_id.return_value = "manytokenseven"
         result = auth.refresh_jwt()
-        result_json = json.loads(result)
-        self.assertEqual(result_json.get('http_status'), 200)
-        self.assertTrue("token" in result_json.get('data'))
+        self.assertEqual(result.get('http_status'), 200)
+        self.assertTrue("token" in result.get('data'))
