@@ -68,6 +68,15 @@ for a new one.
 
 ## Deployment
 
+
+#### Create the DynamoDB table:
+
+- Table Name: `<DYNAMODB TABLE NAME>`
+- Primary Key: `user_id` (type: `Number`)
+
+(you may leave the other options as default if you wish)
+
+
 #### Create an IAM role with a policy that looks something like:
 
 ``` json
@@ -97,13 +106,6 @@ for a new one.
 }
 ```
 
-#### Create the DynamoDB table:
-
-- Table Name: `<DYNAMODB TABLE NAME>`
-- Primary Key: `user_id` (type: `Number`)
-
-(you may leave the other options as default if you wish)
-
 #### Create the Lambda function:
 
 - Name: `tidycat-auth-backend`
@@ -114,9 +116,76 @@ for a new one.
 - Memory: 128 MB
 - Timeout: 30 seconds
 
+
 #### Setup API Gateway:
 
-- Documentation WIP
+Create the following API Gateway resources and methods:
+
+``` text
+/
+  /auth
+    /token
+      POST
+    /refresh
+      POST
+    /ping
+      GET
+```
+
+You will need to run through the following numbered items for _EACH_ of the
+methods above:
+
+1. Choose an **Integration type** of _Lambda Function_ and point it at the
+   `tidycat-auth-backend` Lambda function.
+
+1. Create the following **Body Mapping Templates** for the method's
+   **Integration Request**:
+
+    Content-Type: `application/json`
+
+    ``` json
+    {
+      "resource-path": "$context.resourcePath",
+      "payload": $input.json('$'),
+      "jwt_signing_secret": "${stageVariables.jwt_signing_secret}",
+      "oauth_client_id": "${stageVariables.oauth_client_id}",
+      "oauth_client_secret": "${stageVariables.oauth_client_secret}",
+      "dynamodb_endpoint_url": "${stageVariables.dynamodb_endpoint_url}",
+      "dynamodb_table_name": "${stageVariables.dynamodb_table_name}"
+    }
+    ```
+
+1. Add the following **Method Response** entries, with corresponding **Response
+   Models** of `application/json: Empty`.
+
+    - 200
+    - 400
+    - 401
+    - 500
+
+1. Create the following **Integration Response** entries:
+
+    | Lambda Error Regex       | Method response status | Default mapping | BMT Content-Type   | BMT Template                    |
+    | ------------------       | ---------------------- | --------------- | ----------------   | ------------                    |
+    | _blank_                  | 200                    | Yes             | `application/json` | `$input.json('$.data')`         |
+    | `.*"http_status":.400.*` | 400                    | No              | `application/json` | `$input.path('$.errorMessage')` |
+    | `.*"http_status":.401.*` | 401                    | No              | `application/json` | `$input.path('$.errorMessage')` |
+    | `.*"http_status":.500.*` | 400                    | No              | `application/json` | `$input.path('$.errorMessage')` |
+
+    _Note: BMT = Body Mapping Templates_
+
+After all that is done for each of the methods, we can finally move on to the
+stage variables portion. Ensure that the following **Stage Variables** are set
+appropriately:
+
+- `jwt_signing_secret`
+- `oauth_client_id`
+- `oauth_client_secret`
+- `dynamodb_endpoint_url` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
+- `dynamodb_table_name`
+
+This will seem cumbersome and thankfully doesn't need to be revisited very
+often. If there is a reasonable way to automate this setup, I'm game!
 
 
 ## Development
