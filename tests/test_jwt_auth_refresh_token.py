@@ -100,3 +100,16 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         result = auth.refresh_jwt()
         self.assertEqual(result.get('http_status'), 200)
         self.assertTrue("token" in result.get('data'))
+
+    def test_github_token_field_presence(self):
+        token = jwt.encode({"sub": "user1"},
+                           self.jwt_signing_secret,
+                           algorithm='HS256')
+        payload = {"token": token}
+        self.lambda_event['payload'] = payload
+        auth = JWTAuthentication(self.lambda_event)
+        result = auth.format_jwt("bob", "bobstoken")
+        self.assertEqual(result.get('http_status'), 200)
+        jwt_token = result.get('data').get('token')
+        decoded_token = jwt.decode(jwt_token, verify=False)
+        self.assertEqual(decoded_token.get('github_token'), "bobstoken")
