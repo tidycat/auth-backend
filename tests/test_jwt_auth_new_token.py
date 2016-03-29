@@ -85,7 +85,7 @@ class TestJWTAuthNewToken(unittest.TestCase):
         result_json = json.loads(str(cm.exception))
         self.assertEqual(result_json.get('http_status'), 401)
         self.assertEqual(result_json.get('data').get('error'),
-                         "Could not find GitHub user id")
+                         "Could not find GitHub user information")
 
     def test_unable_to_persist_bearer_token(self):
         payload = {"password": "code123"}
@@ -97,7 +97,8 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.mock_requests.get.return_value.status_code = 200
         self.mock_requests.get.return_value.json.return_value = {
             "user": {
-                "id": "u123"
+                "id": "u123",
+                "login": "bob"
             }
         }
         jwt.store_bearer_token = MagicMock()
@@ -119,7 +120,8 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.mock_requests.get.return_value.status_code = 200
         self.mock_requests.get.return_value.json.return_value = {
             "user": {
-                "id": "u123"
+                "id": "u123",
+                "login": "bob"
             }
         }
         jwt.store_bearer_token = MagicMock()
