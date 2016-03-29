@@ -80,8 +80,8 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         auth.jwt_signing_secret = self.jwt_signing_secret
         auth.lookup_bearer_token = MagicMock()
         auth.lookup_bearer_token.return_value = "suchtoken"
-        auth.retrieve_gh_user_id = MagicMock()
-        auth.retrieve_gh_user_id.return_value = None
+        auth.retrieve_gh_user_info = MagicMock()
+        auth.retrieve_gh_user_info.return_value = (None, None)
         with self.assertRaises(TypeError) as cm:
             auth.refresh_jwt()
         result_json = json.loads(str(cm.exception))
@@ -95,8 +95,8 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         auth.jwt_signing_secret = self.jwt_signing_secret
         auth.lookup_bearer_token = MagicMock()
         auth.lookup_bearer_token.return_value = "suchtoken"
-        auth.retrieve_gh_user_id = MagicMock()
-        auth.retrieve_gh_user_id.return_value = "manytokenseven"
+        auth.retrieve_gh_user_info = MagicMock()
+        auth.retrieve_gh_user_info.return_value = ("manytokenseven", "bob")
         result = auth.refresh_jwt()
         self.assertEqual(result.get('http_status'), 200)
         self.assertTrue("token" in result.get('data'))
@@ -108,8 +108,9 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
         payload = {"token": token}
         self.lambda_event['payload'] = payload
         auth = JWTAuthentication(self.lambda_event)
-        result = auth.format_jwt("bob", "bobstoken")
+        result = auth.format_jwt("123", "bob", "bobstoken")
         self.assertEqual(result.get('http_status'), 200)
         jwt_token = result.get('data').get('token')
         decoded_token = jwt.decode(jwt_token, verify=False)
+        self.assertEqual(decoded_token.get('github_login'), "bob")
         self.assertEqual(decoded_token.get('github_token'), "bobstoken")
