@@ -17,9 +17,9 @@ class JWTAuthentication(object):
                      "oauth_client_id",
                      "oauth_client_secret",
                      "auth_dynamodb_endpoint_url",
-                     "auth_dynamodb_table_name"]:
+                     "auth_dynamodb_table_name",
+                     "auth_desired_oauth_scopes"]:
             setattr(self, prop, lambda_event.get(prop))
-        self.expected_oauth_scopes = ['user']
 
     def dispense_new_jwt(self):
         temp_access_code = self.payload.get("password")
@@ -98,7 +98,7 @@ class JWTAuthentication(object):
 
         gh_response = r.json()
         if not self.are_scopes_sufficient(gh_response['scope']):
-            error_msg = "Need the following GitHub scopes: %s" % ','.join(self.expected_oauth_scopes)  # NOQA
+            error_msg = "Need the following GitHub scopes: %s" % self.auth_desired_oauth_scopes  # NOQA
             logger.info(error_msg)
             return None
 
@@ -106,7 +106,8 @@ class JWTAuthentication(object):
 
     def are_scopes_sufficient(self, scopes):
         scope_list = scopes.split(',')
-        return set(self.expected_oauth_scopes).issubset(set(scope_list))
+        desired_scope_list = self.auth_desired_oauth_scopes.split(',')
+        return set(desired_scope_list).issubset(set(scope_list))
 
     def retrieve_gh_user_info(self, bearer_token):
         r = requests.get(

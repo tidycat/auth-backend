@@ -50,7 +50,8 @@ def handle_request(payload, headers, resource_path):
         "oauth_client_id": os.environ['OAUTH_CLIENT_ID'],
         "oauth_client_secret": os.environ['OAUTH_CLIENT_SECRET'],
         "auth_dynamodb_endpoint_url": os.environ['DYNAMODB_ENDPOINT_URL'],
-        "auth_dynamodb_table_name": os.environ['DYNAMODB_TABLE_NAME']
+        "auth_dynamodb_table_name": os.environ['DYNAMODB_TABLE_NAME'],
+        "auth_desired_oauth_scopes": os.environ['DESIRED_OAUTH_SCOPES']
     }
     try:
         response_payload = handler(event, {})
