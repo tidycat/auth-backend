@@ -24,7 +24,7 @@ class TestJWTAuthNewToken(unittest.TestCase):
                 "password": "temptoken123"
             },
             "auth_dynamodb_endpoint_url": "http://example.com",
-            "dynamodb_table_name": "faker"
+            "auth_dynamodb_table_name": "faker"
         }
 
     def test_empty_temp_access_code(self):

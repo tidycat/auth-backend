@@ -17,7 +17,7 @@ class JWTAuthentication(object):
                      "oauth_client_id",
                      "oauth_client_secret",
                      "auth_dynamodb_endpoint_url",
-                     "dynamodb_table_name"]:
+                     "auth_dynamodb_table_name"]:
             setattr(self, prop, lambda_event.get(prop))
         self.expected_oauth_scopes = ['user']
 
@@ -141,7 +141,7 @@ class JWTAuthentication(object):
                 'dynamodb',
                 endpoint_url=self.auth_dynamodb_endpoint_url
             )
-            table = dynamodb.Table(self.dynamodb_table_name)
+            table = dynamodb.Table(self.auth_dynamodb_table_name)
             response = table.get_item(Key={"user_id": user_id})
             return response['Item'].get('bearer_token')
         except boto3.exceptions.Boto3Error as e:
@@ -154,7 +154,7 @@ class JWTAuthentication(object):
                 'dynamodb',
                 endpoint_url=self.auth_dynamodb_endpoint_url
             )
-            table = dynamodb.Table(self.dynamodb_table_name)
+            table = dynamodb.Table(self.auth_dynamodb_table_name)
             item = {
                 "user_id": user_id,
                 "bearer_token": bearer_token

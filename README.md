@@ -151,7 +151,7 @@ methods above:
       "oauth_client_id": "${stageVariables.oauth_client_id}",
       "oauth_client_secret": "${stageVariables.oauth_client_secret}",
       "auth_dynamodb_endpoint_url": "${stageVariables.auth_dynamodb_endpoint_url}",
-      "dynamodb_table_name": "${stageVariables.dynamodb_table_name}"
+      "auth_dynamodb_table_name": "${stageVariables.auth_dynamodb_table_name}"
     }
     ```
 
@@ -182,7 +182,7 @@ appropriately:
 - `oauth_client_id`
 - `oauth_client_secret`
 - `auth_dynamodb_endpoint_url` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
-- `dynamodb_table_name`
+- `auth_dynamodb_table_name`
 
 This will seem cumbersome and thankfully doesn't need to be revisited very
 often. If there is a reasonable way to automate this setup, I'm game!

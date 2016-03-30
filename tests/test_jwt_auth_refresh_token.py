@@ -30,7 +30,7 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
                 "token": token
             },
             "auth_dynamodb_endpoint_url": "http://example.com",
-            "dynamodb_table_name": "faker"
+            "auth_dynamodb_table_name": "faker"
         }
 
     def test_invalid_jwt(self):
