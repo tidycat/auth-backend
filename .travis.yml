@@ -47,6 +47,14 @@ deploy:
     on:
       repo: 'tidycat/auth-backend'
       tags: true
+  - provider: 'releases'
+    api_key:
+      secure: "KZo2pYiN/Az5wy3QctQvWMGMdQSNJWkq5XH1JmtGQkIhD4YlKVZRCWwwNrTK5j7brHJbq0GSZ3LjW3qKxU2KPoOw/KEZgGPFkGOmcsJYD6siW/3VEAUOxh2T6T3NTyLR6CP5XsXZLhpDRngXUvXIodrpjmhORA7TdhUZXow6fePVDrWgcF9RZ3jgDiE8IJWwfrLoIZd1JhvNW2qTW8hrm4ue9wP8mXw0Lh1bYsOyJrSTo4qVRlodLnbvkZ4f9M3G0Qv8BXqLR3FCH6CsoKkWh6YrNZ8dptHcK585X691YSV/RRBQpAUQD/Fh3rgu4sBC5ACAz13XLsCY4JsXXrYQiRFUXcPeSiR8+ADJQTL3Ca2MhbVp+XMC5QjtWd4M7yYODki6b7HNNdPS6sHdmR4YNpb13We0p6rEl0Qt/EBK1qwssYPRNWXqFEGfWy4ZUC+z8dw1C+iLetXtpuUqZlNXhzX0j5ppfZTLuEY8waAlpV+qtCRQQAZkDXm6L0W+bQMR6cntebMI+D2IxbuaKgvk3azIjdqfm9n3wm3Fbj8JsAW3H99LwEyIYNPPvyd+QN8MwfPP1Qps6qRjBbZXdzDgRyWnV3qHLOOjq++OZjilZYfUDdsjwPKtTU0rIuoG3F/Q8/ShfWTsjtOTOuS25lydp12gqhQLG2P1e0iGEEW+E3Q="
+    file: 'lambda.zip'
+    skip_cleanup: true
+    on:
+      repo: 'tidycat/auth-backend'
+      tags: true
 
 notifications:
   email: false
