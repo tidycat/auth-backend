@@ -23,7 +23,7 @@ class TestJWTAuthNewToken(unittest.TestCase):
             "payload": {
                 "password": "temptoken123"
             },
-            "dynamodb_endpoint_url": "http://example.com",
+            "auth_dynamodb_endpoint_url": "http://example.com",
             "dynamodb_table_name": "faker"
         }
 

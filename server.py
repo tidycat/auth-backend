@@ -49,7 +49,7 @@ def handle_request(payload, headers, resource_path):
         "jwt_signing_secret": "supersekr3t",
         "oauth_client_id": os.environ['OAUTH_CLIENT_ID'],
         "oauth_client_secret": os.environ['OAUTH_CLIENT_SECRET'],
-        "dynamodb_endpoint_url": os.environ['DYNAMODB_ENDPOINT_URL'],
+        "auth_dynamodb_endpoint_url": os.environ['DYNAMODB_ENDPOINT_URL'],
         "dynamodb_table_name": os.environ['DYNAMODB_TABLE_NAME']
     }
     try:

@@ -16,7 +16,7 @@ class JWTAuthentication(object):
                      "jwt_signing_secret",
                      "oauth_client_id",
                      "oauth_client_secret",
-                     "dynamodb_endpoint_url",
+                     "auth_dynamodb_endpoint_url",
                      "dynamodb_table_name"]:
             setattr(self, prop, lambda_event.get(prop))
         self.expected_oauth_scopes = ['user']
@@ -137,8 +137,10 @@ class JWTAuthentication(object):
 
     def lookup_bearer_token(self, user_id):  # pragma: no cover
         try:
-            dynamodb = boto3.resource('dynamodb',
-                                      endpoint_url=self.dynamodb_endpoint_url)
+            dynamodb = boto3.resource(
+                'dynamodb',
+                endpoint_url=self.auth_dynamodb_endpoint_url
+            )
             table = dynamodb.Table(self.dynamodb_table_name)
             response = table.get_item(Key={"user_id": user_id})
             return response['Item'].get('bearer_token')
@@ -148,8 +150,10 @@ class JWTAuthentication(object):
 
     def store_bearer_token(self, user_id, bearer_token):  # pragma: no cover
         try:
-            dynamodb = boto3.resource('dynamodb',
-                                      endpoint_url=self.dynamodb_endpoint_url)
+            dynamodb = boto3.resource(
+                'dynamodb',
+                endpoint_url=self.auth_dynamodb_endpoint_url
+            )
             table = dynamodb.Table(self.dynamodb_table_name)
             item = {
                 "user_id": user_id,

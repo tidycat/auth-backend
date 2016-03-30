@@ -29,7 +29,7 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
             "payload": {
                 "token": token
             },
-            "dynamodb_endpoint_url": "http://example.com",
+            "auth_dynamodb_endpoint_url": "http://example.com",
             "dynamodb_table_name": "faker"
         }
 
