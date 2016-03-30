@@ -190,9 +190,38 @@ often. If there is a reasonable way to automate this setup, I'm game!
 
 ## Development
 
-- Documentation WIP
+#### Tools
+
+- Python 2.7.11 (AWS Lambda needs 2.7.x)
+- Java runtime 6.x or newer (for the local DynamoDB instance)
+
+#### Environment Variables
+
+- `OAUTH_CLIENT_ID` (GitHub [application][4] ID)
+- `OAUTH_CLIENT_SECRET` (GitHub [application][4] secret)
+- `DYNAMODB_ENDPOINT_URL` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
+- `DYNAMODB_TABLE_NAME` (e.g. `tidycat-auth-backend`)
+
+#### Workflow
+
+First and foremost, have a read through all the targets in the Makefile. I've
+opted for the [self-documentation][5] approach so issue a `make` and have a
+look at all your options.
+
+You can run the local test server while developing instead of deploying to AWS
+and testing there (`make server`). If you need to re-initialize the local
+DynamoDB instance, first run `make local-dynamodb` and after that is up and
+running, `make init-local-dynamodb` (in another terminal window).
+
+That should give you a pretty decent local environment to develop in!
+
+[Bug reports][6] or [contributions][7] are always welcome.
 
 
 [1]: https://developer.github.com/v3/oauth/#web-application-flow
 [2]: https://jwt.io
 [3]: https://github.com/jpadilla/ember-simple-auth-token
+[4]: https://github.com/settings/applications/new
+[5]: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+[6]: https://github.com/tidycat/auth-backend/issues
+[7]: https://github.com/tidycat/auth-backend/pulls
