@@ -14,6 +14,7 @@ class JWTAuthentication(object):
     def __init__(self, lambda_event):
         for prop in ["payload",
                      "jwt_signing_secret",
+                     "jwt_expiry_minutes",
                      "oauth_client_id",
                      "oauth_client_secret",
                      "auth_dynamodb_endpoint_url",
@@ -128,7 +129,7 @@ class JWTAuthentication(object):
     def format_jwt(self, userid, login, bearer_token):
         data = {
             'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=int(self.jwt_expiry_minutes)),  # NOQA
             "sub": userid,
             "github_login": login,
             "github_token": bearer_token

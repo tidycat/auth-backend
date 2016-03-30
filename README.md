@@ -148,6 +148,7 @@ methods above:
       "resource-path": "$context.resourcePath",
       "payload": $input.json('$'),
       "jwt_signing_secret": "${stageVariables.jwt_signing_secret}",
+      "jwt_expiry_minutes": "${stageVariables.jwt_expiry_minutes}",
       "oauth_client_id": "${stageVariables.oauth_client_id}",
       "oauth_client_secret": "${stageVariables.oauth_client_secret}",
       "auth_dynamodb_endpoint_url": "${stageVariables.auth_dynamodb_endpoint_url}",
@@ -180,6 +181,7 @@ stage variables portion. Ensure that the following **Stage Variables** are set
 appropriately:
 
 - `jwt_signing_secret`
+- `jwt_expiry_minutes` (e.g. `10`)
 - `oauth_client_id`
 - `oauth_client_secret`
 - `auth_dynamodb_endpoint_url` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)

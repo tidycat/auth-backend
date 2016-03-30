@@ -47,6 +47,7 @@ def handle_request(payload, headers, resource_path):
         "resource-path": resource_path,
         "payload": payload,
         "jwt_signing_secret": "supersekr3t",
+        "jwt_expiry_minutes": "10",
         "oauth_client_id": os.environ['OAUTH_CLIENT_ID'],
         "oauth_client_secret": os.environ['OAUTH_CLIENT_SECRET'],
         "auth_dynamodb_endpoint_url": os.environ['DYNAMODB_ENDPOINT_URL'],

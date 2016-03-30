@@ -18,6 +18,7 @@ class TestJWTAuthNewToken(unittest.TestCase):
 
         self.lambda_event = {
             "jwt_signing_secret": "sekr3t",
+            "jwt_expiry_minutes": "10",
             "oauth_client_id": "c123",
             "oauth_client_secret": "shh!",
             "payload": {
