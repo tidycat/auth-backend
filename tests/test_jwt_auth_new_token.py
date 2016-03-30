@@ -18,13 +18,14 @@ class TestJWTAuthNewToken(unittest.TestCase):
 
         self.lambda_event = {
             "jwt_signing_secret": "sekr3t",
+            "jwt_expiry_minutes": "10",
             "oauth_client_id": "c123",
             "oauth_client_secret": "shh!",
             "payload": {
                 "password": "temptoken123"
             },
-            "dynamodb_endpoint_url": "http://example.com",
-            "dynamodb_table_name": "faker"
+            "auth_dynamodb_endpoint_url": "http://example.com",
+            "auth_dynamodb_table_name": "faker"
         }
 
     def test_empty_temp_access_code(self):
@@ -59,7 +60,7 @@ class TestJWTAuthNewToken(unittest.TestCase):
         payload = {"password": "code123"}
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
-        jwt.expected_oauth_scopes = ['bob']
+        jwt.auth_desired_oauth_scopes = 'bob'
         with self.assertRaises(TypeError) as cm:
             jwt.dispense_new_jwt()
         result_json = json.loads(str(cm.exception))
@@ -71,13 +72,13 @@ class TestJWTAuthNewToken(unittest.TestCase):
         self.mock_requests.post = MagicMock()
         self.mock_requests.post.return_value.status_code = 200
         self.mock_requests.post.return_value.json.return_value = {
-            "scope": "user",
+            "scope": "user,org,bob",
             "access_token": "verytoken"
         }
         payload = {"password": "code123"}
         self.lambda_event['payload'] = payload
         jwt = JWTAuthentication(self.lambda_event)
-        jwt.expected_oauth_scopes = ['user']
+        jwt.auth_desired_oauth_scopes = 'user,org'
         self.mock_requests.get = MagicMock()
         self.mock_requests.get.return_value.status_code = 100
         with self.assertRaises(TypeError) as cm:

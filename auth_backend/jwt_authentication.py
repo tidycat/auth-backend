@@ -14,12 +14,13 @@ class JWTAuthentication(object):
     def __init__(self, lambda_event):
         for prop in ["payload",
                      "jwt_signing_secret",
+                     "jwt_expiry_minutes",
                      "oauth_client_id",
                      "oauth_client_secret",
-                     "dynamodb_endpoint_url",
-                     "dynamodb_table_name"]:
+                     "auth_dynamodb_endpoint_url",
+                     "auth_dynamodb_table_name",
+                     "auth_desired_oauth_scopes"]:
             setattr(self, prop, lambda_event.get(prop))
-        self.expected_oauth_scopes = ['user']
 
     def dispense_new_jwt(self):
         temp_access_code = self.payload.get("password")
@@ -98,7 +99,7 @@ class JWTAuthentication(object):
 
         gh_response = r.json()
         if not self.are_scopes_sufficient(gh_response['scope']):
-            error_msg = "Need the following GitHub scopes: %s" % ','.join(self.expected_oauth_scopes)  # NOQA
+            error_msg = "Need the following GitHub scopes: %s" % self.auth_desired_oauth_scopes  # NOQA
             logger.info(error_msg)
             return None
 
@@ -106,7 +107,8 @@ class JWTAuthentication(object):
 
     def are_scopes_sufficient(self, scopes):
         scope_list = scopes.split(',')
-        return set(self.expected_oauth_scopes).issubset(set(scope_list))
+        desired_scope_list = self.auth_desired_oauth_scopes.split(',')
+        return set(desired_scope_list).issubset(set(scope_list))
 
     def retrieve_gh_user_info(self, bearer_token):
         r = requests.get(
@@ -127,7 +129,7 @@ class JWTAuthentication(object):
     def format_jwt(self, userid, login, bearer_token):
         data = {
             'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=int(self.jwt_expiry_minutes)),  # NOQA
             "sub": userid,
             "github_login": login,
             "github_token": bearer_token
@@ -137,9 +139,11 @@ class JWTAuthentication(object):
 
     def lookup_bearer_token(self, user_id):  # pragma: no cover
         try:
-            dynamodb = boto3.resource('dynamodb',
-                                      endpoint_url=self.dynamodb_endpoint_url)
-            table = dynamodb.Table(self.dynamodb_table_name)
+            dynamodb = boto3.resource(
+                'dynamodb',
+                endpoint_url=self.auth_dynamodb_endpoint_url
+            )
+            table = dynamodb.Table(self.auth_dynamodb_table_name)
             response = table.get_item(Key={"user_id": user_id})
             return response['Item'].get('bearer_token')
         except boto3.exceptions.Boto3Error as e:
@@ -148,9 +152,11 @@ class JWTAuthentication(object):
 
     def store_bearer_token(self, user_id, bearer_token):  # pragma: no cover
         try:
-            dynamodb = boto3.resource('dynamodb',
-                                      endpoint_url=self.dynamodb_endpoint_url)
-            table = dynamodb.Table(self.dynamodb_table_name)
+            dynamodb = boto3.resource(
+                'dynamodb',
+                endpoint_url=self.auth_dynamodb_endpoint_url
+            )
+            table = dynamodb.Table(self.auth_dynamodb_table_name)
             item = {
                 "user_id": user_id,
                 "bearer_token": bearer_token

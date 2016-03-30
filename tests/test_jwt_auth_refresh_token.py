@@ -24,13 +24,14 @@ class TestJWTAuthRefreshToken(unittest.TestCase):
                            algorithm='HS256')
         self.lambda_event = {
             "jwt_signing_secret": "sekr3t",
+            "jwt_expiry_minutes": "10",
             "oauth_client_id": "c123",
             "oauth_client_secret": "shh!",
             "payload": {
                 "token": token
             },
-            "dynamodb_endpoint_url": "http://example.com",
-            "dynamodb_table_name": "faker"
+            "auth_dynamodb_endpoint_url": "http://example.com",
+            "auth_dynamodb_table_name": "faker"
         }
 
     def test_invalid_jwt(self):

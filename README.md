@@ -148,10 +148,12 @@ methods above:
       "resource-path": "$context.resourcePath",
       "payload": $input.json('$'),
       "jwt_signing_secret": "${stageVariables.jwt_signing_secret}",
+      "jwt_expiry_minutes": "${stageVariables.jwt_expiry_minutes}",
       "oauth_client_id": "${stageVariables.oauth_client_id}",
       "oauth_client_secret": "${stageVariables.oauth_client_secret}",
-      "dynamodb_endpoint_url": "${stageVariables.dynamodb_endpoint_url}",
-      "dynamodb_table_name": "${stageVariables.dynamodb_table_name}"
+      "auth_dynamodb_endpoint_url": "${stageVariables.auth_dynamodb_endpoint_url}",
+      "auth_dynamodb_table_name": "${stageVariables.auth_dynamodb_table_name}",
+      "auth_desired_oauth_scopes": "${stageVariables.auth_desired_oauth_scopes}"
     }
     ```
 
@@ -179,10 +181,12 @@ stage variables portion. Ensure that the following **Stage Variables** are set
 appropriately:
 
 - `jwt_signing_secret`
+- `jwt_expiry_minutes` (e.g. `10`)
 - `oauth_client_id`
 - `oauth_client_secret`
-- `dynamodb_endpoint_url` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
-- `dynamodb_table_name`
+- `auth_dynamodb_endpoint_url` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
+- `auth_dynamodb_table_name`
+- `auth_desired_oauth_scopes` (e.g. `user:email,notifications`)
 
 This will seem cumbersome and thankfully doesn't need to be revisited very
 often. If there is a reasonable way to automate this setup, I'm game!
@@ -201,6 +205,7 @@ often. If there is a reasonable way to automate this setup, I'm game!
 - `OAUTH_CLIENT_SECRET` (GitHub [application][4] secret)
 - `DYNAMODB_ENDPOINT_URL` (e.g. `https://dynamodb.us-east-1.amazonaws.com`)
 - `DYNAMODB_TABLE_NAME` (e.g. `tidycat-auth-backend`)
+- `DESIRED_OAUTH_SCOPES` (e.g. `"user:email,notifications"`)
 
 #### Workflow
 
