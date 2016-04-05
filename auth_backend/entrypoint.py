@@ -2,7 +2,7 @@ import logging
 from auth_backend.jwt_authentication import JWTAuthentication
 from auth_backend.http import format_response
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 logging.basicConfig()
 logger = logging.getLogger("auth_backend")
 logger.setLevel(logging.DEBUG)
