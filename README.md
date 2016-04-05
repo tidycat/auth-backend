@@ -43,10 +43,10 @@ for a JWT.
 
 A high level overview of how this works:
 
-1. A human authorizes the Tidy Cat GitHub application access to some of their
+1. A GitHub user authorizes _your_ GitHub application access to some of their
    personal information (using a `Login with GitHub` action).
 
-1. Upon authorization, GitHub redirects the client back with an `access token`.
+1. Upon authorization, GitHub redirects the user back with an `access token`.
 
 1. The client then passes this `access token` along to this authorization
    backend.
