@@ -108,6 +108,8 @@ class JWTAuthentication(object):
     def are_scopes_sufficient(self, scopes):
         scope_list = scopes.split(',')
         desired_scope_list = self.auth_desired_oauth_scopes.split(',')
+        logger.debug("Supplied scope list: %s" % scope_list)
+        logger.debug("Desired scope list: %s" % desired_scope_list)
         return set(desired_scope_list).issubset(set(scope_list))
 
     def retrieve_gh_user_info(self, bearer_token):
