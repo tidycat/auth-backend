@@ -91,12 +91,12 @@ local-dynamodb:  ## Run a local instance of DynamoDB
 		-sharedDb \
 		-dbPath ./dynamodb_sample_data \
 		-delayTransientStatuses \
-		-port 8000
+		-port ${DYNAMODB_LOCAL_PORT}
 
 .PHONY: init-local-dynamodb
 init-local-dynamodb:  ## Initialize the local instance of DynamoDB
 	@aws dynamodb create-table \
-		--endpoint-url http://localhost:8000 \
+		--endpoint-url ${DYNAMODB_ENDPOINT_URL} \
 		--table-name ${DYNAMODB_TABLE_NAME} \
 		--attribute-definitions AttributeName=user_id,AttributeType=N \
 		--key-schema AttributeName=user_id,KeyType=HASH \
